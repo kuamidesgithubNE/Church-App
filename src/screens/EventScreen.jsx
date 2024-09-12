@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.6)", // Background for the content
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 19,
+    fontFamily: "Nunito_700Bold",
     color: "#fff",
     marginBottom: 5,
   },
@@ -123,12 +123,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 0,
+    fontFamily: "Nunito_500Medium",
   },
   cardDescription: {
     fontSize: 14,
     color: "#fff",
     marginBottom: 5,
     lineHeight: 18,
+    fontFamily: "Nunito_500Medium",
   },
   detailsButton: {
     backgroundColor: "#1E90FF",
@@ -138,7 +140,7 @@ const styles = StyleSheet.create({
   },
   detailsButtonText: {
     color: "#fff",
-    fontWeight: "600",
+    fontFamily: "Nunito_500Medium",
     fontSize: 16,
   },
 });

@@ -5,20 +5,19 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import PostForm from "../components/PostForm";
-import Ionicons from "react-native-vector-icons/Ionicons"; // Import Ionicons
-import axios from "axios";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { addTestimony, fetchTestimony } from "../utils/testimony_api";
 
 const TestimoniesScreen = () => {
   const [testimonies, setTestimonies] = useState([]);
 
   // Fetch testimonies from the backend
-  const fetchTestimonies = async () => {
+  const fetchTestimoniesFromAPI = async () => {
     try {
-      const response = await axios.get(
-        "https://your-backend-url.com/api/getTestimonies.php"
-      );
+      const response = await fetchTestimony();
       setTestimonies(response.data);
     } catch (error) {
       console.error("Error fetching testimonies:", error);
@@ -26,42 +25,19 @@ const TestimoniesScreen = () => {
   };
 
   useEffect(() => {
-    fetchTestimonies();
+    fetchTestimoniesFromAPI();
   }, []);
 
-  const toggleFavorite = (index) => {
-    const updatedTestimonies = testimonies.map((item, i) =>
-      i === index ? { ...item, favorited: !item.favorited } : item
-    );
-    setTestimonies(updatedTestimonies);
-  };
-
-  const likeTestimony = (index) => {
-    const updatedTestimonies = testimonies.map((item, i) =>
-      i === index ? { ...item, likes: item.likes + 1 } : item
-    );
-    setTestimonies(updatedTestimonies);
-  };
-
-  const addTestimony = async (username, content) => {
-    const newTestimony = {
-      username,
-      content,
-      date: new Date().toLocaleString(),
-      likes: 0, // Default likes
-      favorited: false, // Default favorited state
-    };
+  const addTestimonyToAPI = async (user_id, content) => {
+    // Define newTestimony without likes and favorited
+    console.log(typeof user_id); // Logs the type of the variable
 
     try {
       // Send the testimony to the backend
-      const response = await axios.post(
-        "https://your-backend-url.com/api/addTestimony.php",
-        newTestimony
-      );
-
-      if (response.data.success) {
+      const response = await addTestimony(user_id, content);
+      if (response.success) {
         // Update the testimonies state with the new testimony after successful submission
-        setTestimonies([...testimonies, newTestimony]);
+        Alert.alert("Success", "You testimony has been added successfully!");
       } else {
         console.error("Error submitting testimony");
       }
@@ -74,7 +50,7 @@ const TestimoniesScreen = () => {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.username}>{item.username}</Text>
-        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.date}>{item.shared_at}</Text>
       </View>
 
       <Text style={styles.content}>{item.content}</Text>
@@ -85,7 +61,7 @@ const TestimoniesScreen = () => {
           style={styles.actionButton}
           onPress={() => likeTestimony(index)}
         >
-          <Ionicons name="thumbs-up-outline" size={18} color="#4CAF50" />
+          <Ionicons name="thumbs-up-outline" size={18} color="#fff" />
           <Text style={styles.actionText}>{item.likes}</Text>
         </TouchableOpacity>
 
@@ -97,7 +73,7 @@ const TestimoniesScreen = () => {
           <Ionicons
             name={item.favorited ? "heart" : "heart-outline"}
             size={18}
-            color={item.favorited ? "red" : "#4CAF50"}
+            color={item.favorited ? "red" : "#fff"}
           />
         </TouchableOpacity>
       </View>
@@ -107,7 +83,7 @@ const TestimoniesScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Ionicons name="chatbubbles-outline" size={30} color="#4CAF50" />
+        <Ionicons name="chatbubbles-outline" size={30} color="#00A2FF" />
         <Text style={styles.title}>Testimonies</Text>
       </View>
 
@@ -116,17 +92,11 @@ const TestimoniesScreen = () => {
         keyExtractor={(item, index) => index.toString()}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text
-            style={{
-              textAlign: "center",
-            }}
-          >
-            No testimonies available
-          </Text>
+          <Text style={{ textAlign: "center" }}>No testimonies available</Text>
         }
       />
 
-      <PostForm onSubmit={addTestimony} />
+      <PostForm onSubmit={addTestimonyToAPI} />
     </View>
   );
 };
@@ -137,6 +107,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: "#fff",
   },
   headerContainer: {
     flexDirection: "row",
@@ -159,6 +130,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+    backgroundColor: "#00A2FF",
   },
   header: {
     flexDirection: "row",
@@ -168,18 +140,18 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 18,
-    color: "#333",
+    color: "#fff",
     fontFamily: "Nunito_700Bold",
   },
   content: {
     fontSize: 16,
     fontFamily: "Nunito_500Medium",
-    color: "#555",
+    color: "#eee",
     marginBottom: 10,
   },
   date: {
     fontSize: 12,
-    color: "#888",
+    color: "#ddd",
     fontFamily: "Nunito_500Medium",
   },
   actionsContainer: {

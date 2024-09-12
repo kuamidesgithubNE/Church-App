@@ -67,20 +67,20 @@ export const update = async (
       image,
       date,
     });
-
-    // Log the API URL and parameters being sent
-    console.log("API URL:", API_URL);
-    console.log("Request parameters:", new URLSearchParams({
-      action: "update_profile",
-      id,
-      name,
-      username,
-      email,
-      location,
-      phone,
-      image,
-      date,
-    }).toString());
+    console.log(
+      "Request parameters:",
+      new URLSearchParams({
+        action: "update_profile",
+        id,
+        name,
+        username,
+        email,
+        location,
+        phone,
+        image,
+        date,
+      }).toString()
+    );
 
     const response = await axios.post(
       API_URL,

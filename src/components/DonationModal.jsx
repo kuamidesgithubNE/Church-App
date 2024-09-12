@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     color: "#00A2FF",
-    fontSize: 17,
+    fontSize: 15,
     fontFamily: "Nunito_700Bold",
   },
   dividerContainer: {
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   orText: {
     marginHorizontal: 10,
-    fontSize: 16,
+    fontSize: 15,
     color: "#888", // Lighter color for "or"
     fontFamily: "Nunito_700Bold",
   },
