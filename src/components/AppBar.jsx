@@ -21,6 +21,7 @@ const truncateText = (text, maxLength = 10) => {
 const AppBar = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchUserdata = async () => {
@@ -30,9 +31,10 @@ const AppBar = () => {
           const parsedData = JSON.parse(userData);
           setUsername(parsedData.username);
           setEmail(parsedData.email);
+          setImage(parsedData.image); // Assuming image is saved in AsyncStorage
         }
       } catch (error) {
-        Alert.alert("Username no fetch");
+        Alert.alert("Failed to fetch user data");
       }
     };
 
@@ -42,15 +44,17 @@ const AppBar = () => {
   // Determine what to display (username or email) and truncate if necessary
   const displayName = truncateText(username || email);
 
+  // Determine image source (from storage or fallback to default)
+  const imageSource = image
+    ? { uri: image } // Use image from AsyncStorage if available
+    : require("../../assets/images/scripture2.jpeg"); // Fallback to default image
+
   return (
     <SafeAreaView style={styles.topSection}>
       <Text style={styles.welcomeText}>Welcome, {displayName}</Text>
       <View style={styles.userInfo}>
         <Ionicons name="notifications-outline" size={22} color="#333" />
-        <Image
-          source={require("../../assets/images/scripture2.jpeg")}
-          style={styles.profileImage}
-        />
+        <Image source={imageSource} style={styles.profileImage} />
       </View>
     </SafeAreaView>
   );

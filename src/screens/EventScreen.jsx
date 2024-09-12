@@ -68,11 +68,11 @@ const EventScreen = () => {
           [selectedDate]: {
             selected: true,
             marked: true,
-            selectedColor: "#00adf5",
+            selectedColor: "#00A2FF",
           },
         }}
         theme={{
-          todayTextColor: "#00adf5",
+          todayTextColor: "#00A2FF",
         }}
       />
 

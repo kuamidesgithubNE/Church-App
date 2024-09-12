@@ -15,6 +15,9 @@ import DonationDetails from "../components/DonationDetails";
 import DonationModal from "../components/DonationModal";
 import EditProfileScreen from "../components/EditProfile";
 import CustomHeader from "../components/CustomHeader";
+import TestimoniesScreen from "../screens/TestimonyScreen";
+import PrayerRequestsScreen from "../screens/PrayerRequest";
+import PostForm from "../components/PostForm";
 
 const AppNavigator = () => {
   return (
@@ -61,13 +64,32 @@ const AppNavigator = () => {
           options={{
             header: () => (
               <CustomHeader
-                title="Profile"
+                title="Edit Profile"
                 onEditPress={() => {
                   // Handle edit press
                 }}
               />
             ),
           }}
+        />
+        <Stack.Screen
+          name="Testimony"
+          component={TestimoniesScreen}
+          options={{
+            header: () => (
+              <CustomHeader
+                title="Testimony"
+                onEditPress={() => {
+                  // Handle edit press
+                }}
+              />
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="PrayerRequest"
+          component={PrayerRequestsScreen}
+          options={{ headerShown: true }}
         />
       </Stack.Navigator>
     </NavigationContainer>

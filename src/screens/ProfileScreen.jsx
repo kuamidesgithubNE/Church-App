@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Button, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Button,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProfileScreen = ({ navigation }) => {
-  // Define userDetails state at the top level
   const [userDetails, setUserDetails] = useState({
+    id: "",
     name: "",
     username: "",
     email: "",
     image: null,
     location: "",
     phone: "",
+    date: "",
+  });
+
+  const [updatatedUserDetails, setupdatedUserDetails] = useState({
+    updatedId: "",
+    updatedName: "",
+    updatedUsername: "",
+    updatedEmail: "",
+    updataedImage: null,
+    updatedLocation: "",
+    updatedPhone: "",
+    updatedDate: "",
   });
 
   useEffect(() => {
@@ -20,14 +39,20 @@ const ProfileScreen = ({ navigation }) => {
         const fetchedUser = await AsyncStorage.getItem("user");
         if (fetchedUser) {
           const userData = JSON.parse(fetchedUser);
+
+          // Format the date
+          const formattedDate = new Date(userData.dob).toLocaleDateString(); // Format as MM/DD/YYYY or customize further
+
           // Set the user data into the state
           setUserDetails({
-            name: userData.fullname || "Unavailable",
-            username: userData.username || "Unavailable",
-            email: userData.email || "Unavailable",
+            id: userData.user_id,
+            name: userData.fullname,
+            username: userData.username,
+            email: userData.email,
             image: userData.image || null,
-            location: userData.location || "Unavailable",
-            phone: userData.phone || "Unavailable",
+            location: userData.location,
+            phone: userData.phone,
+            date: formattedDate, // Use formatted date here
           });
         }
       } catch (error) {
@@ -37,18 +62,38 @@ const ProfileScreen = ({ navigation }) => {
     FetchUserData();
   }, []);
 
-  console.log(userDetails);
+  const getProfileData = async () => {
+    try {
+      const profileData = await AsyncStorage.getItem("userProfile");
+      if (profileData !== null) {
+        // Data is retrieved and can be used
+        const userProfile = JSON.parse(profileData);
+        setUserDetails({
+          id: userProfile.user_id,
+          name: userProfile.fullname,
+          username: userProfile.username,
+          email: userProfile.email,
+          image: userProfile.image || null,
+          location: userProfile.location,
+          phone: userData.phone,
+          date: formattedDate, // Use formatted date here
+        });
+      }
+    } catch (error) {
+      console.error("Error retrieving profile data: ", error);
+    }
+  };
 
   const handleEditProfile = () => {
-    // Navigate to EditProfileScreen with the current user details
-    navigation.navigate("EditProfileScreen", { 
-      id: userDetails.id, 
-      name: userDetails.name, 
-      username: userDetails.username, 
-      email: userDetails.email, 
-      location: userDetails.location, 
-      phone: userDetails.phone, 
-      image: userDetails.image 
+    navigation.navigate("EditProfileScreen", {
+      id: userDetails.id,
+      name: userDetails.name,
+      username: userDetails.username,
+      email: userDetails.email,
+      location: userDetails.location,
+      phone: userDetails.phone,
+      image: userDetails.image,
+      date: userDetails.date,
     });
   };
 
@@ -114,7 +159,17 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <Button title="Edit Profile" onPress={handleEditProfile} />
+        <View style={styles.profileItemContainer}>
+          <Ionicons name="calendar-outline" size={20} color="#000" />
+          <View style={styles.profileItem}>
+            <Text style={styles.label}>Date of Birth:</Text>
+            <Text style={styles.value}>{userDetails.date}</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
+          <Text style={styles.buttonText}>Update Profile</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -154,7 +209,7 @@ const styles = StyleSheet.create({
   PersonalDetailTitle: {
     textAlign: "center",
     fontSize: 20,
-    marginVertical: 20,
+    marginVertical: 10,
     fontFamily: "Nunito_700Bold",
   },
   profileItemContainer: {
@@ -178,6 +233,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     fontFamily: "Nunito_400Regular",
+  },
+  button: {
+    backgroundColor: "#00A2FF",
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
   },
 });
 

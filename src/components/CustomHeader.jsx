@@ -21,9 +21,6 @@ const CustomHeader = ({ title, onEditPress }) => {
         <Ionicons name="chevron-back" size={24} color="#000" />
       </TouchableOpacity>
       <Text style={styles.title}>{title}</Text>
-      <TouchableOpacity style={styles.iconContainer} onPress={onEditPress}>
-        <Ionicons name="create-outline" size={24} color="#000" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -35,13 +32,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     paddingTop: 40,
+    backgroundColor: "#fff",
   },
   title: {
     flex: 1,
     textAlign: "center",
     color: "#000",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontFamily: "Nunito_800ExtraBold",
   },
   iconContainer: {
     width: 40,

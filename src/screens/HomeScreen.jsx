@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-
 const sermons = [
   {
     id: "1",
@@ -44,7 +43,6 @@ const devotions = [
 ];
 
 const Homepage = ({ navigation }) => {
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -65,12 +63,18 @@ const Homepage = ({ navigation }) => {
 
         {/* Quick Triggers */}
         <View style={styles.quickTriggers}>
-          <TouchableOpacity style={styles.quickButton}>
-            <Ionicons name="heart-outline" size={20} color="#A64D79" />
-            <Text style={styles.quickButtonText}>Send a Love Note</Text>
+          <TouchableOpacity
+            style={styles.quickButton}
+            onPress={() => navigation.navigate("Testimony")}
+          >
+            <Ionicons name="chatbubbles-outline" size={20} color="#00A2FF" />
+            <Text style={styles.quickButtonText}>Testimonies</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickButton}>
-            <Ionicons name="" size={20} color="#A64D79" />
+          <TouchableOpacity
+            style={styles.quickButton}
+            onPress={() => navigation.navigate("PrayerRequest")}
+          >
+            <Ionicons name="help-circle-outline" size={20} color="#00A2FF" />
             <Text style={styles.quickButtonText}>Prayer Request</Text>
           </TouchableOpacity>
         </View>
@@ -130,7 +134,7 @@ const styles = StyleSheet.create({
 
   // Bible Quote Card
   welcomeBanner: {
-    borderRadius: 15,
+    borderRadius: 30,
     overflow: "hidden",
     marginBottom: 30,
     height: 180,
@@ -195,9 +199,9 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
   },
   quickButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     marginLeft: 10,
-    color: "#A64D79",
+    color: "#00A2FF",
   },
 
   // Section Titles

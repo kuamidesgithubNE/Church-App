@@ -45,8 +45,43 @@ export const login = async (email, password) => {
 };
 
 // Update user profile
-export const update = async (id, name, username, email, location, phone, image) => {
+export const update = async (
+  id,
+  name,
+  username,
+  email,
+  location,
+  phone,
+  image,
+  date
+) => {
   try {
+    // Log the data before sending the request
+    console.log("Updating profile with data:", {
+      id,
+      name,
+      username,
+      email,
+      location,
+      phone,
+      image,
+      date,
+    });
+
+    // Log the API URL and parameters being sent
+    console.log("API URL:", API_URL);
+    console.log("Request parameters:", new URLSearchParams({
+      action: "update_profile",
+      id,
+      name,
+      username,
+      email,
+      location,
+      phone,
+      image,
+      date,
+    }).toString());
+
     const response = await axios.post(
       API_URL,
       new URLSearchParams({
@@ -57,15 +92,22 @@ export const update = async (id, name, username, email, location, phone, image) 
         email,
         location,
         phone,
-        image
+        image,
+        date,
       }),
       {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
       }
     );
+
+    // Log the response received from the server
+    console.log("Response data:", response.data);
+
     return response.data;
   } catch (error) {
+    // Log the error message if the request fails
     console.error("Update profile error:", error);
+
     throw error;
   }
 };
