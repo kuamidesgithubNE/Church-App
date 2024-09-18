@@ -51,7 +51,16 @@ const AppNavigator = () => {
         <Stack.Screen
           name="DonationDetails"
           component={DonationDetails}
-          options={{ headerShown: true }}
+          options={{
+            header: () => (
+              <CustomHeader
+                title="Donation Details"
+                onEditPress={() => {
+                  // Handle edit press
+                }}
+              />
+            ),
+          }}
         />
         <Stack.Screen
           name="DonateModal"

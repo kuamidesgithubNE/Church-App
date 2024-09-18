@@ -154,14 +154,15 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 22,
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     textAlign: "center",
     marginBottom: 10,
   },
   scriptureText: {
-    fontSize: 17,
+    fontSize: 16,
     color: "#fff",
     textAlign: "center",
+    fontFamily: "Nunito_500Medium",
     fontStyle: "italic",
   },
   section: {
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     marginBottom: 10,
   },
 
@@ -202,14 +203,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginLeft: 10,
     color: "#00A2FF",
+    fontFamily: "Nunito_500Medium",
   },
 
   // Section Titles
   sectionTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    marginTop: 20,
-    marginVertical: 10,
+    fontSize: 18,
+    fontFamily: "Nunito_800ExtraBold",
+    marginTop: 30,
+    marginVertical: 5,
     color: "#333",
   },
 
@@ -237,12 +239,13 @@ const styles = StyleSheet.create({
   },
   sermonTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Nunito_700Bold",
     color: "#fff",
   },
   sermonPastor: {
     fontSize: 12,
     color: "#fff",
+    fontFamily: "Nunito_500Medium",
   },
   playButton: {
     justifyContent: "center",
@@ -272,12 +275,13 @@ const styles = StyleSheet.create({
   },
   devotionTitle: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontFamily: "Nunito_800ExtraBold",
     color: "#333",
   },
   devotionPastor: {
     fontSize: 12,
     color: "#666",
+    fontFamily: "Nunito_500Medium",
   },
 });
 

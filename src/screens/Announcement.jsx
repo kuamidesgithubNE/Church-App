@@ -1,53 +1,61 @@
-// /components/AnnouncementsScreen.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { fetchAnnouncement } from "../utils/announcement_api";
 
 const AnnouncementsScreen = () => {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const truncateText = (text, maxLength = 35) => {
-    if (text.length > maxLength) {
+    if (text && text.length > maxLength) {
       return text.substring(0, maxLength) + "...";
     }
     return text;
   };
 
-  const announcements = [
-    {
-      id: "1",
-      title: "Church Picnic",
-      date: "2024-09-10",
-      description: "Join us for a fun day at the park...",
-    },
-    {
-      id: "2",
-      title: "Prayer Meeting",
-      date: "2024-09-12",
-      description: "We will gather for our monthly prayer meeting...",
-    },
-    // Add more announcements as needed
-  ];
+  // Fetch announcement from the backend
+  const fetchAnnouncementFromAPI = async () => {
+    try {
+      setLoading(true); // Show loading indicator while fetching data
+      const response = await fetchAnnouncement();
+      setAnnouncements(response.data); // Assuming response.data contains the announcement data
+      setLoading(false); // Hide loading indicator after data is fetched
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnnouncementFromAPI(); // Fetch announcements when component loads
+  }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Announcements</Text>
-      <FlatList
-        data={announcements}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.announcementItem}>
-            <View style={styles.IconBox}>
-              <Ionicons name="megaphone" size={20} color="#fff" />
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={announcements}
+          keyExtractor={(item) => item.id.toString()} // Make sure ID is a string
+          renderItem={({ item }) => (
+            <View style={styles.announcementItem}>
+              <View style={styles.IconBox}>
+                <Ionicons name="megaphone" size={20} color="#fff" />
+              </View>
+              <View style={styles.announcementsDetails}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.date}>{item.date}</Text>
+                <Text style={styles.description}>
+                  {truncateText(item.content)}
+                </Text>
+              </View>
             </View>
-            <View style={styles.announcementsDetails}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.date}>{item.date}</Text>
-              <Text style={styles.description}>
-                {truncateText(item.description)}
-              </Text>
-            </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
     </View>
   );
 };

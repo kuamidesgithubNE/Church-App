@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 15,
+    padding: 20,
   },
   imageBox: {
     marginVertical: 10,
@@ -199,9 +199,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#00A2FF",
     padding: 15,
     borderRadius: 10,
-    marginTop: 30,
+    marginTop: 40,
     alignItems: "center",
-    marginTop: 165,
   },
   donateButtonText: {
     color: "#fff",

@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16,
+    padding: 10,
     paddingTop: 40,
     backgroundColor: "#fff",
   },

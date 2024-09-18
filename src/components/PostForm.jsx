@@ -1,40 +1,38 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  TextInput,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import { addTestimony } from "../utils/testimony_api";
+import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-const PostForm = ({ onSubmit }) => {
+const PostForm = ({ onSubmit, onSuccess }) => {
   const [user_id, setUserID] = useState("");
   const [content, setContent] = useState("");
 
-  // Fetching the username from AsyncStorage when the component mounts
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const fetchUser = await AsyncStorage.getItem("user");
         if (fetchUser) {
           const userData = JSON.parse(fetchUser);
-          setUserID(userData.user_id); // Set the username state
+          setUserID(userData.user_id);
         }
       } catch (error) {
         console.log("Error fetching user data", error);
       }
     };
-    fetchUserData(); // Call the function to fetch data
+    fetchUserData();
   }, []);
 
-  // Handles the submission of the form
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (user_id && content) {
-      onSubmit(user_id, content); // Pass the username and content to the parent function
-      setContent(""); // Clear the content field after submission
+      try {
+        const success = await onSubmit(user_id, content);
+        if (success) {
+          setContent(""); // Clear the content field after submission
+          onSuccess(); // Call the onSuccess callback
+        }
+      } catch (error) {
+        alert("An error occurred. Please try again.");
+      }
     } else {
       alert("Please enter your testimony.");
     }
@@ -49,11 +47,7 @@ const PostForm = ({ onSubmit }) => {
         onChangeText={setContent}
         multiline
       />
-      <TouchableOpacity
-        title="Submit"
-        style={styles.sendBtn}
-        onPress={handleSubmit}
-      >
+      <TouchableOpacity style={styles.sendBtn} onPress={handleSubmit}>
         <Ionicons name="send-outline" size={20} color="#fff" />
       </TouchableOpacity>
     </View>
@@ -64,7 +58,6 @@ export default PostForm;
 
 const styles = StyleSheet.create({
   form: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     marginTop: 20,
@@ -78,13 +71,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 50,
     width: "84%",
-    alignItems: "center",
     backgroundColor: "#fff",
   },
   sendBtn: {
     padding: 15,
     backgroundColor: "#00A2FF",
-    color: "#fff",
     borderRadius: 30,
   },
 });

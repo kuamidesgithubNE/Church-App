@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -6,13 +7,40 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Modal,
+  Button,
 } from "react-native";
 import PostForm from "../components/PostForm";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { addTestimony, fetchTestimony } from "../utils/testimony_api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  addTestimony,
+  fetchTestimony,
+  deleteTestimony,
+} from "../utils/testimony_api"; // Assuming you have a deleteTestimony API
 
 const TestimoniesScreen = () => {
   const [testimonies, setTestimonies] = useState([]);
+  const [userId, setUserId] = useState(null); // For storing the user's ID
+  const [selectedTestimony, setSelectedTestimony] = useState(null); // For storing the selected testimony for edit/delete
+  const [isModalVisible, setModalVisible] = useState(false); // Modal visibility
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTestimoniesFromAPI(); // Fetch data when the screen is focused
+      getUserIdFromStorage(); // Get user_id from AsyncStorage
+    }, [])
+  );
+
+  const getUserIdFromStorage = async () => {
+    try {
+      const user = await AsyncStorage.getItem("user");
+      const userData = JSON.parse(user);
+      setUserId(userData.user_id);
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+    }
+  };
 
   // Fetch testimonies from the backend
   const fetchTestimoniesFromAPI = async () => {
@@ -24,20 +52,12 @@ const TestimoniesScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchTestimoniesFromAPI();
-  }, []);
-
   const addTestimonyToAPI = async (user_id, content) => {
-    // Define newTestimony without likes and favorited
-    console.log(typeof user_id); // Logs the type of the variable
-
     try {
-      // Send the testimony to the backend
       const response = await addTestimony(user_id, content);
       if (response.success) {
-        // Update the testimonies state with the new testimony after successful submission
-        Alert.alert("Success", "You testimony has been added successfully!");
+        Alert.alert("Success", "Your testimony has been added successfully!");
+        fetchTestimoniesFromAPI(); // Refresh testimonies
       } else {
         console.error("Error submitting testimony");
       }
@@ -46,8 +66,37 @@ const TestimoniesScreen = () => {
     }
   };
 
+  const handleLongPress = (items) => {
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].id === userId) {
+        setSelectedTestimony(items[i]); // Set the testimony to be edited or deleted
+        setModalVisible(true); // Show modal
+        break; // Exit the loop once the matching item is found
+      }
+    }
+  };
+
+  const handleDeleteTestimony = async () => {
+    try {
+      const response = await deleteTestimony(selectedTestimony.id); // Assuming testimony has an ID
+      if (response.success) {
+        Alert.alert("Deleted", "Your testimony has been deleted.");
+        fetchTestimoniesFromAPI(); // Refresh testimonies after deletion
+      } else {
+        console.error("Error deleting testimony");
+      }
+    } catch (error) {
+      console.error("Error deleting testimony:", error);
+    } finally {
+      setModalVisible(false); // Hide modal after action
+    }
+  };
+
   const renderItem = ({ item, index }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      onLongPress={() => handleLongPress(item)}
+      style={styles.card}
+    >
       <View style={styles.header}>
         <Text style={styles.username}>{item.username}</Text>
         <Text style={styles.date}>{item.shared_at}</Text>
@@ -56,7 +105,6 @@ const TestimoniesScreen = () => {
       <Text style={styles.content}>{item.content}</Text>
 
       <View style={styles.actionsContainer}>
-        {/* Like Button */}
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => likeTestimony(index)}
@@ -65,7 +113,6 @@ const TestimoniesScreen = () => {
           <Text style={styles.actionText}>{item.likes}</Text>
         </TouchableOpacity>
 
-        {/* Favorite Button */}
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => toggleFavorite(index)}
@@ -77,7 +124,7 @@ const TestimoniesScreen = () => {
           />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -97,6 +144,32 @@ const TestimoniesScreen = () => {
       />
 
       <PostForm onSubmit={addTestimonyToAPI} />
+
+      {/* Modal for Edit/Delete */}
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit or Delete Testimony</Text>
+            <Button
+              title="Edit"
+              onPress={() => {
+                /* Implement editing logic here */
+              }}
+            />
+            <Button
+              title="Delete"
+              color="red"
+              onPress={handleDeleteTestimony}
+            />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -121,7 +194,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#00A2FF",
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
@@ -130,7 +203,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
-    backgroundColor: "#00A2FF",
   },
   header: {
     flexDirection: "row",
@@ -169,5 +241,21 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 14,
     color: "#333",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    marginHorizontal: 30,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 15,
+    textAlign: "center",
   },
 });
