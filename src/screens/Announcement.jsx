@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchAnnouncement } from "../utils/announcement_api";
+import { useNavigation } from "@react-navigation/native";
 
 const AnnouncementsScreen = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation(); // Use navigation hook
 
   const truncateText = (text, maxLength = 35) => {
-    if (text && text.length > maxLength) {
-      return text.substring(0, maxLength) + "...";
-    }
-    return text;
+    return text?.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
   };
 
-  // Fetch announcement from the backend
   const fetchAnnouncementFromAPI = async () => {
     try {
-      setLoading(true); // Show loading indicator while fetching data
+      setLoading(true);
       const response = await fetchAnnouncement();
-      setAnnouncements(response.data); // Assuming response.data contains the announcement data
-      setLoading(false); // Hide loading indicator after data is fetched
+      setAnnouncements(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching announcements:", error);
       setLoading(false);
@@ -28,21 +36,37 @@ const AnnouncementsScreen = () => {
   };
 
   useEffect(() => {
-    fetchAnnouncementFromAPI(); // Fetch announcements when component loads
+    fetchAnnouncementFromAPI();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchAnnouncementFromAPI();
+    setRefreshing(false);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Announcements</Text>
       {loading ? (
-        <Text>Loading...</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
       ) : (
         <FlatList
           data={announcements}
-          keyExtractor={(item) => item.id.toString()} // Make sure ID is a string
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.announcementItem}>
-              <View style={styles.IconBox}>
+            <TouchableOpacity
+              style={styles.announcementItem}
+              onPress={() =>
+                navigation.navigate("AnnouncementDetails", {
+                  title: item.title,
+                  date: item.date,
+                  content: item.content,
+                  attachments: item.attachments, // Attachments for full view
+                })
+              }
+            >
+              <View style={styles.iconBox}>
                 <Ionicons name="megaphone" size={20} color="#fff" />
               </View>
               <View style={styles.announcementsDetails}>
@@ -52,8 +76,12 @@ const AnnouncementsScreen = () => {
                   {truncateText(item.content)}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          nestedScrollEnabled={true}
         />
       )}
     </View>
@@ -72,7 +100,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Nunito_800ExtraBold",
   },
-  IconBox: {
+  loadingText: {
+    textAlign: "center",
+    fontSize: 18,
+    color: "gray",
+  },
+  iconBox: {
     paddingVertical: 35,
     paddingHorizontal: 25,
     backgroundColor: "#00A2FF",
@@ -92,6 +125,7 @@ const styles = StyleSheet.create({
   },
   announcementsDetails: {
     padding: 10,
+    flex: 1,
   },
   title: {
     fontSize: 18,

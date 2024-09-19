@@ -4,11 +4,13 @@ import {
   View,
   Text,
   FlatList,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
   Alert,
   Modal,
   Button,
+  RefreshControl,
 } from "react-native";
 import PostForm from "../components/PostForm";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -24,6 +26,7 @@ const TestimoniesScreen = () => {
   const [userId, setUserId] = useState(null); // For storing the user's ID
   const [selectedTestimony, setSelectedTestimony] = useState(null); // For storing the selected testimony for edit/delete
   const [isModalVisible, setModalVisible] = useState(false); // Modal visibility
+  const [refreshing, setRefreshing] = useState(false); // For refresh control
 
   useFocusEffect(
     React.useCallback(() => {
@@ -92,6 +95,12 @@ const TestimoniesScreen = () => {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchTestimoniesFromAPI(); // Refresh the testimonies
+    setRefreshing(false); // Stop the spinner after data is fetched
+  };
+
   const renderItem = ({ item, index }) => (
     <TouchableOpacity
       onLongPress={() => handleLongPress(item)}
@@ -128,12 +137,13 @@ const TestimoniesScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Ionicons name="chatbubbles-outline" size={30} color="#00A2FF" />
-        <Text style={styles.title}>Testimonies</Text>
-      </View>
-
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      nestedScrollEnabled={true}
+    >
       <FlatList
         data={testimonies}
         keyExtractor={(item, index) => index.toString()}
@@ -141,6 +151,7 @@ const TestimoniesScreen = () => {
         ListEmptyComponent={
           <Text style={{ textAlign: "center" }}>No testimonies available</Text>
         }
+        nestedScrollEnabled={true}
       />
 
       <PostForm onSubmit={addTestimonyToAPI} />
@@ -170,7 +181,7 @@ const TestimoniesScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -178,20 +189,8 @@ export default TestimoniesScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     backgroundColor: "#fff",
-  },
-  headerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginLeft: 10,
   },
   card: {
     backgroundColor: "#00A2FF",

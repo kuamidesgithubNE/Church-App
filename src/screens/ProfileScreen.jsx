@@ -6,6 +6,8 @@ import {
   Button,
   Image,
   TouchableOpacity,
+  ScrollView,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,66 +24,50 @@ const ProfileScreen = ({ navigation }) => {
     date: "",
   });
 
-  const [updatatedUserDetails, setupdatedUserDetails] = useState({
+  const [refreshing, setRefreshing] = useState(false); // State to manage refresh
+  const [updatedUserDetails, setUpdatedUserDetails] = useState({
     updatedId: "",
     updatedName: "",
     updatedUsername: "",
     updatedEmail: "",
-    updataedImage: null,
+    updatedImage: null,
     updatedLocation: "",
     updatedPhone: "",
     updatedDate: "",
   });
 
   useEffect(() => {
-    const FetchUserData = async () => {
-      try {
-        const fetchedUser = await AsyncStorage.getItem("user");
-        if (fetchedUser) {
-          const userData = JSON.parse(fetchedUser);
-
-          // Format the date
-          const formattedDate = new Date(userData.dob).toLocaleDateString(); // Format as MM/DD/YYYY or customize further
-
-          // Set the user data into the state
-          setUserDetails({
-            id: userData.user_id,
-            name: userData.fullname,
-            username: userData.username,
-            email: userData.email,
-            image: userData.image || null,
-            location: userData.location,
-            phone: userData.phone,
-            date: formattedDate, // Use formatted date here
-          });
-        }
-      } catch (error) {
-        console.log("Error fetching user data", error);
-      }
-    };
     FetchUserData();
   }, []);
 
-  const getProfileData = async () => {
+  const FetchUserData = async () => {
     try {
-      const profileData = await AsyncStorage.getItem("userProfile");
-      if (profileData !== null) {
-        // Data is retrieved and can be used
-        const userProfile = JSON.parse(profileData);
+      const fetchedUser = await AsyncStorage.getItem("user");
+      if (fetchedUser) {
+        const userData = JSON.parse(fetchedUser);
+
+        const formattedDate = new Date(userData.dob).toLocaleDateString();
+
         setUserDetails({
-          id: userProfile.user_id,
-          name: userProfile.fullname,
-          username: userProfile.username,
-          email: userProfile.email,
-          image: userProfile.image || null,
-          location: userProfile.location,
+          id: userData.user_id,
+          name: userData.fullname,
+          username: userData.username,
+          email: userData.email,
+          image: userData.image || null,
+          location: userData.location,
           phone: userData.phone,
-          date: formattedDate, // Use formatted date here
+          date: formattedDate,
         });
       }
     } catch (error) {
-      console.error("Error retrieving profile data: ", error);
+      console.log("Error fetching user data", error);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await FetchUserData(); // Refresh user data
+    setRefreshing(false);
   };
 
   const handleEditProfile = () => {
@@ -98,7 +84,12 @@ const ProfileScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> // Apply RefreshControl
+      }
+    >
       <View style={styles.profileSection}>
         <Image
           source={
@@ -171,7 +162,7 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={styles.buttonText}>Update Profile</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

@@ -18,6 +18,7 @@ import CustomHeader from "../components/CustomHeader";
 import TestimoniesScreen from "../screens/TestimonyScreen";
 import PrayerRequestsScreen from "../screens/PrayerRequest";
 import PostForm from "../components/PostForm";
+import AnnouncementDetailsScreen from "../screens/AnnouncementDetailsScreen";
 
 const AppNavigator = () => {
   return (
@@ -99,6 +100,20 @@ const AppNavigator = () => {
           name="PrayerRequest"
           component={PrayerRequestsScreen}
           options={{ headerShown: true }}
+        />
+        <Stack.Screen
+          name="AnnouncementDetails"
+          component={AnnouncementDetailsScreen}
+          options={{
+            header: () => (
+              <CustomHeader
+                title="Announcement Details"
+                onEditPress={() => {
+                  // Handle edit press
+                }}
+              />
+            ),
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
