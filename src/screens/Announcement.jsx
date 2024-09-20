@@ -6,16 +6,18 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Modal,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchAnnouncement } from "../utils/announcement_api";
-import { useNavigation } from "@react-navigation/native";
 
 const AnnouncementsScreen = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const navigation = useNavigation(); // Use navigation hook
+  const [modalVisible, setModalVisible] = useState(false); // Modal visibility state
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null); // Selected announcement for modal
 
   const truncateText = (text, maxLength = 35) => {
     return text?.length > maxLength
@@ -45,6 +47,18 @@ const AnnouncementsScreen = () => {
     setRefreshing(false);
   };
 
+  // Open modal and set selected announcement
+  const openModal = (announcement) => {
+    setSelectedAnnouncement(announcement);
+    setModalVisible(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setSelectedAnnouncement(null);
+    setModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Announcements</Text>
@@ -57,14 +71,7 @@ const AnnouncementsScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.announcementItem}
-              onPress={() =>
-                navigation.navigate("AnnouncementDetails", {
-                  title: item.title,
-                  date: item.date,
-                  content: item.content,
-                  attachments: item.attachments, // Attachments for full view
-                })
-              }
+              onPress={() => openModal(item)} // Open modal on press
             >
               <View style={styles.iconBox}>
                 <Ionicons name="megaphone" size={20} color="#fff" />
@@ -81,9 +88,31 @@ const AnnouncementsScreen = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          nestedScrollEnabled={true}
         />
       )}
+
+      {/* Modal for showing announcement details */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Announcement Details</Text>
+            <Text style={styles.modalContent}>
+              {selectedAnnouncement?.content}
+            </Text>
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -139,6 +168,42 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontFamily: "Nunito_500Medium",
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 15,
+    marginHorizontal: 30,
+    borderRadius: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "Nunito_800ExtraBold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalContent: {
+    fontSize: 16,
+    fontFamily: "Nunito_500Medium",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: "#00A2FF",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
   },
 });
 

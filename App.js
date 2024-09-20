@@ -6,6 +6,7 @@ import {
   Nunito_700Bold,
   Nunito_800ExtraBold,
   Nunito_500Medium,
+  Nunito_700Bold_Italic,
 } from "@expo-google-fonts/nunito";
 import AppNavigator from "./src/navigations/routes";
 
@@ -15,6 +16,7 @@ export default function App() {
     Nunito_700Bold,
     Nunito_800ExtraBold,
     Nunito_500Medium,
+    Nunito_700Bold_Italic,
   });
 
   if (!fontsLoaded) {

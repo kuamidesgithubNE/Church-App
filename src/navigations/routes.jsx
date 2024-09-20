@@ -17,8 +17,7 @@ import EditProfileScreen from "../components/EditProfile";
 import CustomHeader from "../components/CustomHeader";
 import TestimoniesScreen from "../screens/TestimonyScreen";
 import PrayerRequestsScreen from "../screens/PrayerRequest";
-import PostForm from "../components/PostForm";
-import AnnouncementDetailsScreen from "../screens/AnnouncementDetailsScreen";
+import OfferingScreen from "../screens/OfferingScreen";
 
 const AppNavigator = () => {
   return (
@@ -72,47 +71,29 @@ const AppNavigator = () => {
           name="EditProfileScreen"
           component={EditProfileScreen}
           options={{
-            header: () => (
-              <CustomHeader
-                title="Edit Profile"
-                onEditPress={() => {
-                  // Handle edit press
-                }}
-              />
-            ),
+            header: () => <CustomHeader title="Edit Profile" />,
           }}
         />
         <Stack.Screen
           name="Testimony"
           component={TestimoniesScreen}
           options={{
-            header: () => (
-              <CustomHeader
-                title="Testimony"
-                onEditPress={() => {
-                  // Handle edit press
-                }}
-              />
-            ),
+            header: () => <CustomHeader title="Testimony" />,
           }}
         />
         <Stack.Screen
           name="PrayerRequest"
           component={PrayerRequestsScreen}
-          options={{ headerShown: true }}
-        />
-        <Stack.Screen
-          name="AnnouncementDetails"
-          component={AnnouncementDetailsScreen}
           options={{
-            header: () => (
-              <CustomHeader
-                title="Announcement Details"
-                onEditPress={() => {
-                  // Handle edit press
-                }}
-              />
-            ),
+            header: () => <CustomHeader title="Prayer Request" />,
+          }}
+        />
+
+        <Stack.Screen
+          name="Offering"
+          component={OfferingScreen}
+          options={{
+            header: () => <CustomHeader title="Offering" />,
           }}
         />
       </Stack.Navigator>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-const PostForm = ({ onSubmit, onSuccess }) => {
+const PostForm = ({ onSubmit, onSuccess, type }) => {
   const [user_id, setUserID] = useState("");
   const [content, setContent] = useState("");
 
@@ -25,16 +25,18 @@ const PostForm = ({ onSubmit, onSuccess }) => {
   const handleSubmit = async () => {
     if (user_id && content) {
       try {
-        const success = await onSubmit(user_id, content);
+        const success = await onSubmit(user_id, content, type);
         if (success) {
           setContent(""); // Clear the content field after submission
-          onSuccess(); // Call the onSuccess callback
+          if (onSuccess) {
+            onSuccess(); // Call the onSuccess callback
+          }
         }
       } catch (error) {
         alert("An error occurred. Please try again.");
       }
     } else {
-      alert("Please enter your testimony.");
+      alert("Please enter your content.");
     }
   };
 
@@ -42,7 +44,7 @@ const PostForm = ({ onSubmit, onSuccess }) => {
     <View style={styles.form}>
       <TextInput
         style={styles.input}
-        placeholder="Enter your testimony or prayer request"
+        placeholder={`Enter your ${type === 'testimony' ? 'testimony' : 'prayer request'}`}
         value={content}
         onChangeText={setContent}
         multiline

@@ -4,12 +4,11 @@ import {
   View,
   Text,
   FlatList,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   Alert,
   Modal,
-  Button,
+  Pressable,
   RefreshControl,
 } from "react-native";
 import PostForm from "../components/PostForm";
@@ -19,169 +18,167 @@ import {
   addTestimony,
   fetchTestimony,
   deleteTestimony,
-} from "../utils/testimony_api"; // Assuming you have a deleteTestimony API
+} from "../utils/testimony_api";
 
 const TestimoniesScreen = () => {
   const [testimonies, setTestimonies] = useState([]);
-  const [userId, setUserId] = useState(null); // For storing the user's ID
-  const [selectedTestimony, setSelectedTestimony] = useState(null); // For storing the selected testimony for edit/delete
-  const [isModalVisible, setModalVisible] = useState(false); // Modal visibility
-  const [refreshing, setRefreshing] = useState(false); // For refresh control
+  const [userId, setUserId] = useState(null);
+  const [selectedTestimony, setSelectedTestimony] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
+  // Fetch testimonies and user ID when screen is in focus
   useFocusEffect(
     React.useCallback(() => {
-      fetchTestimoniesFromAPI(); // Fetch data when the screen is focused
-      getUserIdFromStorage(); // Get user_id from AsyncStorage
+      fetchTestimoniesFromAPI();
+      getUserIdFromStorage();
     }, [])
   );
 
+  // Truncate long text for display
+  const truncateText = (text, maxLength = 35) => {
+    return text?.length > maxLength
+      ? `${text.substring(0, maxLength)}...`
+      : text;
+  };
+
+  // Get user ID from AsyncStorage
   const getUserIdFromStorage = async () => {
     try {
       const user = await AsyncStorage.getItem("user");
       const userData = JSON.parse(user);
-      setUserId(userData.user_id);
+      setUserId(userData?.user_id);
     } catch (error) {
       console.error("Error fetching user ID:", error);
     }
   };
 
-  // Fetch testimonies from the backend
+  // Fetch testimonies from API
   const fetchTestimoniesFromAPI = async () => {
     try {
       const response = await fetchTestimony();
-      setTestimonies(response.data);
+      setTestimonies(response?.data || []);
     } catch (error) {
       console.error("Error fetching testimonies:", error);
     }
   };
 
+  // Add testimony to API
   const addTestimonyToAPI = async (user_id, content) => {
     try {
       const response = await addTestimony(user_id, content);
       if (response.success) {
-        Alert.alert("Success", "Your testimony has been added successfully!");
-        fetchTestimoniesFromAPI(); // Refresh testimonies
-      } else {
-        console.error("Error submitting testimony");
+        Alert.alert("Success", "Your testimony has been added!");
+        fetchTestimoniesFromAPI();
       }
     } catch (error) {
       console.error("Error adding testimony:", error);
     }
   };
 
-  const handleLongPress = (items) => {
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].id === userId) {
-        setSelectedTestimony(items[i]); // Set the testimony to be edited or deleted
-        setModalVisible(true); // Show modal
-        break; // Exit the loop once the matching item is found
-      }
+  // Handle long press on testimony for actions
+  const handleLongPress = (item) => {
+    if (item.user_id === userId) {
+      setSelectedTestimony(item);
+      setModalVisible(true);
     }
   };
 
+  // Handle short press to view details in modal
+  const handlePress = (item) => {
+    setSelectedTestimony(item);
+    setModalVisible(true);
+  };
+
+  // Delete selected testimony
   const handleDeleteTestimony = async () => {
     try {
-      const response = await deleteTestimony(selectedTestimony.id); // Assuming testimony has an ID
+      const response = await deleteTestimony(selectedTestimony.id);
       if (response.success) {
-        Alert.alert("Deleted", "Your testimony has been deleted.");
-        fetchTestimoniesFromAPI(); // Refresh testimonies after deletion
-      } else {
-        console.error("Error deleting testimony");
+        Alert.alert("Deleted", "Testimony has been deleted.");
+        fetchTestimoniesFromAPI();
       }
     } catch (error) {
       console.error("Error deleting testimony:", error);
     } finally {
-      setModalVisible(false); // Hide modal after action
+      setModalVisible(false);
     }
   };
 
+  // Refresh testimonies
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchTestimoniesFromAPI(); // Refresh the testimonies
-    setRefreshing(false); // Stop the spinner after data is fetched
+    await fetchTestimoniesFromAPI();
+    setRefreshing(false);
   };
 
-  const renderItem = ({ item, index }) => (
+  // Render each testimony item
+  const renderItem = ({ item }) => (
     <TouchableOpacity
       onLongPress={() => handleLongPress(item)}
+      onPress={() => handlePress(item)} // Click to view details
       style={styles.card}
     >
-      <View style={styles.header}>
+      <View style={styles.iconBox}>
+        <Ionicons name="chatbubbles-outline" size={20} color="#fff" />
+      </View>
+      <View style={styles.details}>
         <Text style={styles.username}>{item.username}</Text>
         <Text style={styles.date}>{item.shared_at}</Text>
-      </View>
-
-      <Text style={styles.content}>{item.content}</Text>
-
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => likeTestimony(index)}
-        >
-          <Ionicons name="thumbs-up-outline" size={18} color="#fff" />
-          <Text style={styles.actionText}>{item.likes}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => toggleFavorite(index)}
-        >
-          <Ionicons
-            name={item.favorited ? "heart" : "heart-outline"}
-            size={18}
-            color={item.favorited ? "red" : "#fff"}
-          />
-        </TouchableOpacity>
+        <Text style={styles.content}>{truncateText(item.content)}</Text>
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="thumbs-up-outline" size={18} color="#00A2FF" />
+            <Text style={styles.actionText}>{item.likes}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons
+              name={item.favorited ? "heart" : "heart-outline"}
+              size={18}
+              color={item.favorited ? "red" : "#00A2FF"}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      nestedScrollEnabled={true}
-    >
+    <View style={styles.container}>
       <FlatList
         data={testimonies}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text style={{ textAlign: "center" }}>No testimonies available</Text>
+          <Text style={styles.emptyText}>No testimonies available</Text>
         }
-        nestedScrollEnabled={true}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
-
-      <PostForm onSubmit={addTestimonyToAPI} />
-
-      {/* Modal for Edit/Delete */}
+      <PostForm onSubmit={addTestimonyToAPI} type="testimony" />
       <Modal
-        visible={isModalVisible}
+        visible={modalVisible}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit or Delete Testimony</Text>
-            <Button
-              title="Edit"
-              onPress={() => {
-                /* Implement editing logic here */
-              }}
-            />
-            <Button
-              title="Delete"
-              color="red"
-              onPress={handleDeleteTestimony}
-            />
-            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Testimony Details</Text>
+            <Text style={styles.modalContent}>
+              {selectedTestimony?.content}
+            </Text>
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -189,41 +186,45 @@ export default TestimoniesScreen;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     padding: 20,
     backgroundColor: "#fff",
   },
   card: {
-    backgroundColor: "#00A2FF",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-  },
-  header: {
+    marginVertical: 8,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    display: "flex",
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  iconBox: {
+    paddingVertical: 35,
+    paddingHorizontal: 25,
+    backgroundColor: "#00A2FF",
+    height: "100%",
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+  },
+  details: {
+    flex: 1,
+    padding: 10,
   },
   username: {
     fontSize: 18,
-    color: "#fff",
     fontFamily: "Nunito_700Bold",
+  },
+  date: {
+    fontSize: 12,
+    color: "#bbb",
+    fontFamily: "Nunito_500Medium",
   },
   content: {
     fontSize: 16,
     fontFamily: "Nunito_500Medium",
-    color: "#eee",
-    marginBottom: 10,
-  },
-  date: {
-    fontSize: 12,
-    color: "#ddd",
-    fontFamily: "Nunito_500Medium",
+    marginVertical: 2,
   },
   actionsContainer: {
     flexDirection: "row",
@@ -233,28 +234,49 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 15,
-    fontSize: 14,
+    marginRight: 12,
   },
   actionText: {
     marginLeft: 5,
     fontSize: 14,
-    color: "#333",
   },
-  modalContainer: {
+  emptyText: {
+    textAlign: "center",
+    fontSize: 18,
+    color: "#aaa",
+  },
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 20,
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 15,
     marginHorizontal: 30,
-    borderRadius: 10,
+    borderRadius: 8,
   },
   modalTitle: {
     fontSize: 18,
-    marginBottom: 15,
+    fontFamily: "Nunito_800ExtraBold",
+    marginBottom: 10,
     textAlign: "center",
+  },
+  modalContent: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+    fontFamily: "Nunito_500Medium",
+  },
+  closeButton: {
+    backgroundColor: "#00A2FF",
+    padding: 10,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 16,
+    fontFamily: "Nunito_700Bold",
   },
 });

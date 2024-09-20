@@ -39,7 +39,10 @@ const DonationScreen = () => {
     <ScrollView style={styles.container}>
       <View style={styles.message}>
         <Text style={styles.title}>Start New Fundraising</Text>
-        <TouchableOpacity style={styles.startButton}>
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => navigation.navigate("Offering")}
+        >
           <Text style={styles.startButtonText}>Start Now</Text>
         </TouchableOpacity>
       </View>
